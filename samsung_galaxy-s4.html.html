@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Galaxy S4 Simulator</title>
+
+<style>
+
+body{
+margin:0;
+background:#111;
+font-family:sans-serif;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.phone{
+width:360px;
+height:640px;
+background:black;
+border-radius:30px;
+overflow:hidden;
+position:relative;
+box-shadow:0 0 40px black;
+}
+
+/* BOOT SCREEN */
+
+#boot{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:black;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:9999;
+flex-direction:column;
+color:white;
+font-size:42px;
+font-weight:bold;
+}
+
+.bootlogo span{
+font-size:18px;
+opacity:0.7;
+}
+
+/* STATUS BAR */
+
+.statusbar{
+height:24px;
+background:rgba(0,0,0,0.6);
+color:white;
+font-size:12px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:2px 6px;
+}
+
+/* ADDED STATUS ICONS */
+
+.status-icons{
+display:flex;
+align-items:center;
+gap:4px;
+}
+
+.status-icons img{
+height:14px;
+}
+
+/* SCREEN */
+
+.screen{
+width:100%;
+height:100%;
+background:url("https://i.imgur.com/qwZQZ6R.jpg");
+background-size:cover;
+position:relative;
+overflow:hidden;
+}
+
+.lock{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:url("https://i.imgur.com/qwZQZ6R.jpg");
+background-size:cover;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+color:white;
+font-size:30px;
+transition:0.4s;
+}
+
+.swipe{
+font-size:14px;
+opacity:0.8;
+margin-top:15px;
+}
+
+.pages{
+display:flex;
+width:300%;
+height:100%;
+transition:0.3s;
+}
+
+.page{
+width:100%;
+padding-top:40px;
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:18px;
+padding-left:20px;
+padding-right:20px;
+}
+
+.icon{
+text-align:center;
+color:white;
+font-size:12px;
+}
+
+.iconbox{
+width:52px;
+height:52px;
+margin:auto;
+border-radius:12px;
+background:rgba(255,255,255,0.25);
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:24px;
+margin-bottom:6px;
+cursor:pointer;
+}
+
+.notification{
+position:absolute;
+top:-260px;
+width:100%;
+height:260px;
+background:#222;
+color:white;
+transition:0.3s;
+padding:10px;
+}
+
+.app{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:white;
+display:none;
+flex-direction:column;
+}
+
+.appheader{
+background:#0a84ff;
+color:white;
+padding:10px;
+}
+
+.settingitem{
+padding:12px;
+border-bottom:1px solid #ddd;
+}
+
+.homebtn{
+position:absolute;
+bottom:10px;
+left:50%;
+transform:translateX(-50%);
+width:70px;
+height:26px;
+background:white;
+border-radius:14px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="phone">
+
+<div id="boot">
+<div class="bootlogo">
+SAMSUNG<br>
+<span>GALAXY S4</span>
+</div>
+</div>
+
+<audio id="bootsound" src="https://www.myinstants.com/media/sounds/samsung-galaxy-s4-startup.mp3"></audio>
+
+<div class="screen" id="screen">
+
+<div class="statusbar">
+
+<span>Galaxy S4</span>
+
+<span id="clock"></span>
+
+<!-- ADDED REAL STATUS ICONS -->
+
+<div class="status-icons">
+<img src="https://cdn-icons-png.flaticon.com/512/483/483947.png">
+<img src="https://cdn-icons-png.flaticon.com/512/483/483356.png">
+<img src="https://cdn-icons-png.flaticon.com/512/565/565345.png">
+</div>
+
+</div>
+
+<div class="notification" id="notif">
+<b>Notifications</b>
+<br><br>
+Wi-Fi connected<br>
+Battery 90%<br>
+No new messages
+</div>
+
+<div class="lock" id="lock">
+<div id="locktime"></div>
+<div class="swipe">Swipe up to unlock</div>
+</div>
+
+<div class="pages" id="pages">
+
+<div class="page">
+
+<div class="icon">
+<div class="iconbox" onclick="openApp('phone')">📞</div>
+Phone
+</div>
+
+<div class="icon">
+<div class="iconbox" onclick="openApp('msg')">💬</div>
+Messages
+</div>
+
+<div class="icon">
+<div class="iconbox" onclick="openApp('camera')">📷</div>
+Camera
+</div>
+
+<div class="icon">
+<div class="iconbox" onclick="openApp('settings')">⚙️</div>
+Settings
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="homebtn" onclick="goHome()"></div>
+
+</div>
+
+<script>
+
+let page=0
+let startX=0
+let startY=0
+
+function updateClock(){
+let d=new Date()
+let t=d.getHours()+":"+String(d.getMinutes()).padStart(2,"0")
+clock.innerText=t
+locktime.innerText=t
+}
+
+setInterval(updateClock,1000)
+updateClock()
+
+document.addEventListener("touchstart",e=>{
+startX=e.touches[0].clientX
+startY=e.touches[0].clientY
+})
+
+document.addEventListener("touchmove",e=>{
+
+let dx=e.touches[0].clientX-startX
+let dy=e.touches[0].clientY-startY
+
+if(lock.style.display!="none"){
+if(startY-e.touches[0].clientY>80){
+lock.style.transform="translateY(-100%)"
+setTimeout(()=>lock.style.display="none",300)
+}
+return
+}
+
+if(dy>70){
+notif.style.top="0"
+}
+
+})
+
+function openApp(id){
+document.getElementById(id).style.display="flex"
+}
+
+function goHome(){
+document.querySelectorAll(".app").forEach(a=>a.style.display="none")
+}
+
+/* BOOT SEQUENCE */
+
+window.onload=()=>{
+let boot=document.getElementById("boot")
+let sound=document.getElementById("bootsound")
+
+sound.play().catch(()=>{})
+
+setTimeout(()=>{
+boot.style.display="none"
+},4500)
+}
+
+</script>
+
+</body>
+</html>
